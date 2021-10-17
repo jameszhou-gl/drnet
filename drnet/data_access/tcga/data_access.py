@@ -43,10 +43,11 @@ def convert_array(text):
 
 sqlite3.register_adapter(np.ndarray, adapt_array)
 sqlite3.register_converter("ARRAY", convert_array)
-sqlite3.register_converter("DATE", lambda x: datetime.datetime.fromtimestamp(float(x)/1000))
+sqlite3.register_converter("DATE", lambda x: datetime.datetime.fromtimestamp(float(x) / 1000))
 
 
 class DataAccess(BaseDataAccess):
+    # DB_FILE_NAME = "../../../data/tcga.db"
     DB_FILE_NAME = "tcga.db"
     MIN_FILE_NAME = "min_val.npy"
     MAX_FILE_NAME = "max_val.npy"
@@ -71,7 +72,7 @@ class DataAccess(BaseDataAccess):
         min_path = os.path.join(this_directory, DataAccess.MIN_FILE_NAME)
         max_path = os.path.join(this_directory, DataAccess.MAX_FILE_NAME)
         if os.path.exists(min_path) and \
-           os.path.exists(max_path):
+                os.path.exists(max_path):
             self.min_val, self.max_val = np.load(min_path)[:-1], np.load(max_path)[:-1]
         else:
             self.min_val, self.max_val = None, None
@@ -79,6 +80,7 @@ class DataAccess(BaseDataAccess):
         self.setup_schema()
 
     def connect(self):
+        print('file path: {}'.format(join(self.data_dir, DataAccess.DB_FILE_NAME)))
         self.db = sqlite3.connect(join(self.data_dir, DataAccess.DB_FILE_NAME),
                                   check_same_thread=False,
                                   detect_types=sqlite3.PARSE_DECLTYPES)
@@ -396,7 +398,7 @@ class DataAccess(BaseDataAccess):
         if args["with_propensity_batch"] and is_train:
             propensity_batch_probability = float(args["propensity_batch_probability"])
             num_randomised_neighbours = int(np.rint(args["num_randomised_neighbours"]))
-            rnaseq_data, treatment_data, batch_y, treatment_strength =\
+            rnaseq_data, treatment_data, batch_y, treatment_strength = \
                 self.enhance_batch_with_propensity_matches(args,
                                                            benchmark,
                                                            treatment_data,

@@ -20,17 +20,24 @@ from __future__ import print_function
 
 import os
 import sys
+from os import path
+
+sys.path.append(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))
+# print(sys.path)
+
 import numpy as np
 import pandas as pd
 from os.path import join
 
 # Configure tensorflow not to use the entirety of GPU memory.
 import tensorflow as tf
+
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 
 from keras.callbacks import TensorBoard
+
 from drnet.apps.util import time_function
 from drnet.models.model_eval import ModelEvaluation
 from drnet.apps.evaluate import EvaluationApplication
@@ -51,7 +58,7 @@ from drnet.models.baselines.ordinary_least_squares import OrdinaryLeastSquares1,
 from drnet.apps.parameters import clip_percentage, parse_parameters
 from drnet.data_access.patient_generator import make_generator, get_last_row_id
 from drnet.models.benchmarks.icu_benchmark import ICUBenchmark
-
+from drnet.apps.util import time_function
 
 class MainApplication(EvaluationApplication):
     def __init__(self, args):
@@ -261,8 +268,8 @@ class MainApplication(EvaluationApplication):
             model.load(self.args["load_existing"])
 
         if self.args["do_train"]:
-            if EvaluationApplication.method_is_neural_network(self.args["method"]) and\
-               self.args["with_propensity_batch"]:
+            if EvaluationApplication.method_is_neural_network(self.args["method"]) and \
+                    self.args["with_propensity_batch"]:
                 adjusted_train_steps = train_steps / self.benchmark.get_num_treatments()
             else:
                 adjusted_train_steps = train_steps
@@ -379,5 +386,6 @@ class MainApplication(EvaluationApplication):
 
 
 if __name__ == '__main__':
+    # sys.path.append('/Users/guanglinzhou/Documents/Code/drnet/drnet')
     app = MainApplication(parse_parameters())
     app.run()

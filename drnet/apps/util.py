@@ -64,7 +64,9 @@ def time_function(task_name):
             t_dur = time.time() - t_start
             report_duration(task_name, t_dur)
             return return_value
+
         return func_wrapper
+
     return time_function
 
 

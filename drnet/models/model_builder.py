@@ -39,8 +39,8 @@ class ModelBuilder(object):
 
         if extra_loss is not None:
             if isinstance(extra_loss, list):
-                for i in range(1, 1+len(extra_loss)):
-                    losses[i] = extra_loss[i-1]
+                for i in range(1, 1 + len(extra_loss)):
+                    losses[i] = extra_loss[i - 1]
             else:
                 losses[1] = extra_loss
 
@@ -68,13 +68,15 @@ class ModelBuilder(object):
                                kernel_regularizer=L1L2(l2=l2_weight),
                                bias_regularizer=L1L2(l2=l2_weight),
                                use_bias=not with_bn,
-                               activity_regularizer=last_activity_regulariser if i == num_layers-1 else None,
-                               activation=activation)\
+                               activity_regularizer=last_activity_regulariser if i == num_layers - 1 else None,
+                               activation=activation) \
                 (last_layer)
 
             if with_bn:
                 last_layer = BatchNormalization(gamma_regularizer=L1L2(l2=l2_weight),
                                                 beta_regularizer=L1L2(l2=l2_weight))(last_layer)
+            else:
+                pass
 
             last_layer = Dropout(p_dropout)(last_layer)
             if propensity_dropout is not None:
@@ -93,8 +95,10 @@ class ModelBuilder(object):
         return last_layer
 
     @staticmethod
-    def build_multi_stream(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001, num_layers=2,
-                           num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False, with_propensity_dropout=True,
+    def build_multi_stream(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001,
+                           num_layers=2,
+                           num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False,
+                           with_propensity_dropout=True,
                            normalize=True,
                            **kwargs):
         treatment_input = Input(shape=(1,), dtype="int32")
@@ -133,8 +137,10 @@ class ModelBuilder(object):
         return main_model
 
     @staticmethod
-    def build_simple(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001, num_layers=2,
-                     num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False, with_propensity_dropout=True,
+    def build_simple(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001,
+                     num_layers=2,
+                     num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False,
+                     with_propensity_dropout=True,
                      normalize=True, with_exposure=False,
                      **kwargs):
         covariate_input = Input(shape=(input_dim,))
@@ -182,8 +188,10 @@ class ModelBuilder(object):
         return main_model
 
     @staticmethod
-    def build_tarnet(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001, num_layers=2,
-                     num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False, with_propensity_dropout=True,
+    def build_tarnet(input_dim, output_dim, num_units=128, dropout=0.0, l2_weight=0.0, learning_rate=0.0001,
+                     num_layers=2,
+                     num_treatments=2, p_ipm=0.5, imbalance_loss_weight=1.0, with_bn=False,
+                     with_propensity_dropout=True,
                      normalize=True, with_exposure=False, num_exposure_strata=5, with_exposure_strata=True,
                      with_multiple_exposure_inputs=True,
                      **kwargs):
@@ -221,18 +229,17 @@ class ModelBuilder(object):
 
             propensity_dropout = Lambda(get_treatment_propensities)([propensity_dropout, treatment_input])
             propensity_dropout = Lambda(lambda x: 1. - gamma -
-                                                  1./2. * (-x * tf.log(x + K.epsilon()) -
-                                                           (1 - x)*tf.log(1 - x + K.epsilon())))\
+                                                  1. / 2. * (-x * tf.log(x + K.epsilon()) -
+                                                             (1 - x) * tf.log(1 - x + K.epsilon()))) \
                 (propensity_dropout)
         else:
             propensity_dropout = None
 
         regulariser = None
         if imbalance_loss_weight != 0.0:
-
             def wasserstein_distance_regulariser(x):
-                return imbalance_loss_weight*wasserstein(x, treatment_input, p_ipm,
-                                                         num_treatments=num_treatments)
+                return imbalance_loss_weight * wasserstein(x, treatment_input, p_ipm,
+                                                           num_treatments=num_treatments)
 
             regulariser = wasserstein_distance_regulariser
 
@@ -283,8 +290,8 @@ class ModelBuilder(object):
                 step_size = 1.0 / num_exposure_strata
                 for bin_idx in range(num_exposure_strata):
                     def get_indices_between(x):
-                        lower_limit = step_size*bin_idx
-                        upper_limit = step_size*(bin_idx+1)
+                        lower_limit = step_size * bin_idx
+                        upper_limit = step_size * (bin_idx + 1)
                         upper_indices = tf.greater_equal(tf.reshape(x, (-1,)), lower_limit)
                         if bin_idx == num_exposure_strata - 1:
                             lower_indices = tf.less_equal(tf.reshape(x, (-1,)), upper_limit)
@@ -344,8 +351,8 @@ class ModelBuilder(object):
 
             # x = map(lambda xi, i: K.print_tensor(xi, "stitch(" + str(i) + ")="), x, range(len(x)))
 
-            data_indices = map(tf.to_int32, x[:num_tensors/2])
-            data = map(tf.to_float, x[num_tensors/2:])
+            data_indices = map(tf.to_int32, x[:num_tensors / 2])
+            data = map(tf.to_float, x[num_tensors / 2:])
 
             stitched = tf.dynamic_stitch(data_indices, data)
             return stitched

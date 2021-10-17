@@ -146,11 +146,14 @@ command_params_exposure = "--with_exposure " \
 command_template = "mkdir -p {OUTPUT_FOLDER}/{NAME}/run_{i}/ && " \
                    "CUDA_VISIBLE_DEVICES='' {SUB_COMMAND} "
 
+# ALL_MODELS = [
+#     "pbm_mahal", "no_tarnet", "tarnet_no_repeat", "tarnet_no_strata",
+#     "knn", "psmpbm_mahal", "gps", "bart", "cf", "ganite", "tarnetpd", "tarnet", "cfrnet"
+# ]
 ALL_MODELS = [
     "pbm_mahal", "no_tarnet", "tarnet_no_repeat", "tarnet_no_strata",
     "knn", "psmpbm_mahal", "gps", "bart", "cf", "ganite", "tarnetpd", "tarnet", "cfrnet"
 ]
-
 
 DEFAULT_NUM_REPEATS = 5
 DEFAULT_EXPOSURE_STRATA = 5
@@ -170,8 +173,8 @@ def get_cnews_config():
     treatment_set = [2, 4, 8, 16]
     kappa_set = [10, 10, 10, 7]
     model_set = ALL_MODELS
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -186,8 +189,8 @@ def get_cnews_kappa_config():
     treatment_set = [2, 2, 2, 2, 2, 2, 2]
     kappa_set = [5, 7, 10, 12, 15, 17, 20]
     model_set = ["tarnet", "tarnet_no_strata", "no_tarnet", "gps"]
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -203,8 +206,8 @@ def get_tcga_confounding_config():
     treatment_set = [3] * len(num_tcga_features)
     kappa_set = [10] * len(num_tcga_features)
     model_set = ["tarnet"]
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -220,8 +223,9 @@ def get_tcga_config():
     kappa_set = [10]
     # "knn" and "bart" are too slow for this number of features.
     model_set = set(ALL_MODELS) - {"knn", "bart"}
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    model_set = {"ganite"}
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -235,9 +239,9 @@ def get_icu_exposure_config():
     num_repeats = 1
     treatment_set = [3]
     kappa_set = [10]
-    model_set = ["tarnet"]*len(num_exposure_stratas)
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    model_set = ["tarnet"] * len(num_exposure_stratas)
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -252,8 +256,8 @@ def get_icu_config():
     treatment_set = [3]
     kappa_set = [10]
     model_set = ALL_MODELS
-    es_set = ["mse"]*len(model_set)
-    pbm_percentages = [1.0]*len(es_set)
+    es_set = ["mse"] * len(model_set)
+    pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
            kappa_set, model_set, es_set, pbm_percentages, num_tcga_features, num_exposure_stratas
 
@@ -294,13 +298,13 @@ def get_dataset_params(DATASET, is_exposure=True):
             = get_tcga_config()
 
     if num_tcga_features is None:
-        num_tcga_features = [0]*len(kappa_set)
+        num_tcga_features = [0] * len(kappa_set)
 
     if exposures is None:
-        exposures = [is_exposure]*len(kappa_set)
+        exposures = [is_exposure] * len(kappa_set)
 
     if num_exposure_stratas is None:
-        num_exposure_stratas = [DEFAULT_EXPOSURE_STRATA]*len(model_set)
+        num_exposure_stratas = [DEFAULT_EXPOSURE_STRATA] * len(model_set)
 
     return DATASET, num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, kappa_set, \
            model_set, es_set, pbm_percentages, num_tcga_features, exposures, num_exposure_stratas
@@ -383,7 +387,7 @@ def run(DATASET, DATASET_PATH, OUTPUT_FOLDER, SUB_COMMAND, LOG_FILE):
                         MODEL_TYPE=model_type,
                         EARLY_STOPPING_TYPE=early_stopping_type,
                         EXP_STRATA="{0:d}".format(int(num_exposure_strata)) + "e"
-                                   if num_exposure_strata != DEFAULT_EXPOSURE_STRATA else "")
+                        if num_exposure_strata != DEFAULT_EXPOSURE_STRATA else "")
 
             for i in range(0, num_repeats):
                 local_log_file = LOG_FILE.format(NAME=name, i=i)
@@ -409,15 +413,16 @@ def run(DATASET, DATASET_PATH, OUTPUT_FOLDER, SUB_COMMAND, LOG_FILE):
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:
-        print("USAGE: ./run_all_experiments.py {PATH_TO_FOLDER_CONTAINING_MAIN.PY} {DATASET_NAME} {DATABASE_PATH} {OUTPUT_FOLDER}\n"
-              "       e.g. ./run_all_experiments.py ./ news ./data ./results\n"
-              "       where \n"
-              "         PATH_TO_FOLDER_CONTAINING_MAIN.PY is the path to the directory that contains main.py\n"
-              "         DATASET_NAME is one of (news, tcga, icu)\n"
-              "         DATABASE_PATH is the path to the directory containing tcga.db and news.db \n"
-              "                       (See README.md on where to download tcga.db and news.db)\n"
-              "         OUTPUT_FOLDER is the path to the directory to which you want to save experiment results.\n",
-              file=sys.stderr)
+        print(
+            "USAGE: ./run_all_experiments.py {PATH_TO_FOLDER_CONTAINING_MAIN.PY} {DATASET_NAME} {DATABASE_PATH} {OUTPUT_FOLDER}\n"
+            "       e.g. ./run_all_experiments.py ./ news ./data ./results\n"
+            "       where \n"
+            "         PATH_TO_FOLDER_CONTAINING_MAIN.PY is the path to the directory that contains main.py\n"
+            "         DATASET_NAME is one of (news, tcga, icu)\n"
+            "         DATABASE_PATH is the path to the directory containing tcga.db and news.db \n"
+            "                       (See README.md on where to download tcga.db and news.db)\n"
+            "         OUTPUT_FOLDER is the path to the directory to which you want to save experiment results.\n",
+            file=sys.stderr)
     else:
         # Path where the python executable file is located.
         BINARY_FOLDER = sys.argv[1]
