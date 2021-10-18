@@ -60,6 +60,7 @@ from drnet.data_access.patient_generator import make_generator, get_last_row_id
 from drnet.models.benchmarks.icu_benchmark import ICUBenchmark
 from drnet.apps.util import time_function
 
+
 class MainApplication(EvaluationApplication):
     def __init__(self, args):
         super(MainApplication, self).__init__(args)
@@ -223,7 +224,7 @@ class MainApplication(EvaluationApplication):
         num_losses = 1
 
         if EvaluationApplication.method_is_neural_network(method):
-            actual_batch_size = batch_size
+            actual_batch_size = batch_size  # 50
         else:
             actual_batch_size = train_steps
 

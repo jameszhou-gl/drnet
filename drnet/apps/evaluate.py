@@ -117,6 +117,7 @@ class EvaluationApplication(object):
         elif self.args["do_hyperopt"]:
             return self.run_hyperopt()
         else:
+            # default: signle CPU run, not split into multiple CPUs.
             return self.run_single()
 
     def run_single(self, evaluate_against="test"):

@@ -223,7 +223,7 @@ def get_tcga_config():
     kappa_set = [10]
     # "knn" and "bart" are too slow for this number of features.
     model_set = set(ALL_MODELS) - {"knn", "bart"}
-    model_set = {"ganite"}
+    model_set = {"tarnet"}
     es_set = ["mse"] * len(model_set)
     pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
