@@ -223,7 +223,7 @@ def get_tcga_config():
     kappa_set = [10]
     # "knn" and "bart" are too slow for this number of features.
     model_set = set(ALL_MODELS) - {"knn", "bart"}
-    model_set = {"tarnet"}
+    model_set = {"cfrnet"}
     es_set = ["mse"] * len(model_set)
     pbm_percentages = [1.0] * len(es_set)
     return num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \
@@ -264,6 +264,10 @@ def get_icu_config():
 
 def get_dataset_params(DATASET, is_exposure=True):
     exposures, num_exposure_stratas, num_tcga_features = None, None, None
+    num_hyperopt_runs = None
+    early_stopping_patience, num_repeats, treatment_set = None, None, None
+    num_epochs, es_set, pbm_percentages = None, None, None
+    kappa_set, model_set = None, None
     if DATASET == "news_treatment_assignment_bias":
         # Kappa t2
         num_hyperopt_runs, num_epochs, early_stopping_patience, num_repeats, treatment_set, \

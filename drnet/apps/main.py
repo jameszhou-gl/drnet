@@ -60,6 +60,8 @@ from drnet.data_access.patient_generator import make_generator, get_last_row_id
 from drnet.models.benchmarks.icu_benchmark import ICUBenchmark
 from drnet.apps.util import time_function
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1, 3"
+
 
 class MainApplication(EvaluationApplication):
     def __init__(self, args):
@@ -70,8 +72,8 @@ class MainApplication(EvaluationApplication):
 
     def make_train_generator(self, randomise=True, stratify=True):
         seed = int(np.rint(self.args["seed"]))
-        validation_fraction = clip_percentage(self.args["validation_set_fraction"])
-        test_fraction = clip_percentage(self.args["test_set_fraction"])
+        validation_fraction = clip_percentage(self.args["validation_set_fraction"])  # 0.27
+        test_fraction = clip_percentage(self.args["test_set_fraction"])  # 0.1
 
         train_generator, train_steps = make_generator(self.args,
                                                       self.benchmark,
@@ -224,7 +226,7 @@ class MainApplication(EvaluationApplication):
         num_losses = 1
 
         if EvaluationApplication.method_is_neural_network(method):
-            actual_batch_size = batch_size  # 50
+            actual_batch_size = batch_size
         else:
             actual_batch_size = train_steps
 
@@ -262,6 +264,7 @@ class MainApplication(EvaluationApplication):
         network_params["tensorboard_callback"] = tb
 
         model = method_type()
+        # model design
         model.build(**network_params)
 
         if self.args["load_existing"]:

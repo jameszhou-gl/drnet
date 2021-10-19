@@ -75,15 +75,15 @@ class NeuralNetwork(Baseline):
                                            min_delta=0.0001)
 
         callbacks = [
-            early_stopping,
-            ModelFactoryCheckpoint(filepath=best_model_path,
-                                   save_best_only=True,
-                                   save_weights_only=True,
-                                   monitor=monitor_name,
-                                   mode=monitor_mode),
-            LearningRateScheduler(lambda epoch: 0.05 if epoch < 10 else 0.005)
+                        early_stopping,
+                        ModelFactoryCheckpoint(filepath=best_model_path,
+                                               save_best_only=True,
+                                               save_weights_only=True,
+                                               monitor=monitor_name,
+                                               mode=monitor_mode),
+                        LearningRateScheduler(lambda epoch: 0.05 if epoch < 10 else 0.005)
 
-        ] + tb
+                    ] + tb
         return callbacks
 
     def fit_generator(self, train_generator, train_steps, val_generator, val_steps, num_epochs, batch_size):

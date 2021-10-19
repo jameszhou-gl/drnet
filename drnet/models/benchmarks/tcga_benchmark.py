@@ -28,6 +28,7 @@ class TCGABenchmark(Benchmark):
                  num_relevant_gene_loci_mean=10, num_relevant_gene_loci_std=3, response_mean_of_mean=0.45,
                  response_std_of_mean=0.15, response_mean_of_std=0.1, response_std_of_std=0.05,
                  strength_of_assignment_bias=10, epsilon_std=0.15, with_exposure=True, **kwargs):
+        # access tcga.db
         super(TCGABenchmark, self).__init__(DataAccess(data_dir, **kwargs), num_treatments, **kwargs)
         self.centroids = None
         self.dosage_centroids = None
@@ -108,8 +109,8 @@ class TCGABenchmark(Benchmark):
         return centroids_tmp
 
     def fit(self, generator, steps, batch_size):
-        num_samples = steps*batch_size
-        centroid_indices = sorted(self.random_generator.permutation(steps*batch_size)[:self.num_treatments + 1])
+        num_samples = steps * batch_size
+        centroid_indices = sorted(self.random_generator.permutation(steps * batch_size)[:self.num_treatments + 1])
 
         if self.with_exposure:
             self.dosage_centroids = []
@@ -218,9 +219,9 @@ class TCGABenchmark(Benchmark):
                                                         )
 
         if self.with_exposure:
-            return treatment_chosen, self.scaling_constant*y, treatment_strengths
+            return treatment_chosen, self.scaling_constant * y, treatment_strengths
         else:
-            return treatment_chosen, self.scaling_constant*y
+            return treatment_chosen, self.scaling_constant * y
 
     def get_centroid_weights(self, x, centroids=None):
         if centroids is None:

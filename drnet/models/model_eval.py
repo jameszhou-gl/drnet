@@ -218,7 +218,7 @@ class ModelEvaluation(object):
 
     @staticmethod
     def calculate_statistics_multiclass(y_true, y_pred, set_name, with_print):
-        from keras.utils import to_categorical
+        from tensorflow.keras.utils import to_categorical
 
         # Remove columns where all y_true are 0 - this would cause an error in calculating the statistics.
         present_columns = y_true.any(axis=0)

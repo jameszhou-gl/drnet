@@ -43,12 +43,12 @@ class EvaluationApplication(object):
         self.args = args
         print("INFO: Args are:", self.args, file=sys.stderr)
         print("INFO: Running at", str(datetime.now()), file=sys.stderr)
-
         benchmark_type = EvaluationApplication.get_benchmark_name_map()[self.args["benchmark"]]
         self.best_score_index = 0
         self.best_score = np.finfo(float).max
         self.best_params = ""
         self.best_model_name = "best_model.npy"
+        # benchamrk.data_access connects to tcga.db, done
         self.benchmark = benchmark_type(self.args["dataset"], **self.args)
         self.setup()
 
@@ -77,7 +77,7 @@ class EvaluationApplication(object):
         tf.set_random_seed(seed)
 
         # Configure tensorflow not to use the entirety of GPU memory at start.
-        config = tf.ConfigProto()
+        config = tf.ConfigProto(inter_op_parallelism_threads=32, intro_op_parallelism_threads=32)
         config.gpu_options.allow_growth = True
         session = tf.Session(config=config)
 
@@ -124,8 +124,9 @@ class EvaluationApplication(object):
         print("INFO: Run with args:", self.args, file=sys.stderr)
 
         save_predictions = self.args["save_predictions"]
-
+        # note; if benchmark is tcga: self.benchmark.selected_features==20531
         self.benchmark.initialise(self.args)
+        # todo, what's purpose here
         benchmark_generator, orig_benchmark_steps = self.make_train_generator(stratify=False)
         benchmark_generator, benchmark_steps = make_keras_generator(self.args,
                                                                     benchmark_generator,
@@ -133,7 +134,7 @@ class EvaluationApplication(object):
                                                                     batch_size=orig_benchmark_steps,
                                                                     num_losses=1,
                                                                     benchmark=self.benchmark)
-
+        # todo what's purpose here
         self.benchmark.fit(benchmark_generator, benchmark_steps, orig_benchmark_steps)
 
         train_generator, train_steps = self.make_train_generator()
@@ -211,7 +212,7 @@ class EvaluationApplication(object):
         initial_args = dict(initial_args)
         new_args = {
             "hyperopt_offset": hyperopt_offset,
-            "num_hyperopt_runs": hyperopt_offset+1,
+            "num_hyperopt_runs": hyperopt_offset + 1,
             "do_hyperopt_on_lsf": False,
             "output_directory": run_directory
         }
@@ -246,7 +247,7 @@ class EvaluationApplication(object):
                         # Only merge the latest result.
                         last_idx = find_nth(contents, "Best_test_score", num_run_results - 2)
                         contents = contents[last_idx:]
-                        contents = contents[contents.find("}")+1:]  # Remove the last line too.
+                        contents = contents[contents.find("}") + 1:]  # Remove the last line too.
                     outfile.write(contents)
 
     @staticmethod
@@ -286,6 +287,7 @@ class EvaluationApplication(object):
             run_start_time = time.time()
 
             hyperopt_parameters = self.get_hyperopt_parameters()
+            # choose one when the param is list-type?
             self.args = EvaluationApplication.get_random_hyperopt_parameters(initial_args,
                                                                              hyperopt_parameters,
                                                                              hyperopt_index=i)
@@ -300,6 +302,7 @@ class EvaluationApplication(object):
             else:
                 eval_set = "test" if self.args["hyperopt_against_eval_set"] else "val"
                 score_dict, test_dict = self.run_single(evaluate_against=eval_set)
+                # todo go on looking from here
                 score_dicts.append(score_dict)
                 test_score_dicts.append(test_dict)
 
